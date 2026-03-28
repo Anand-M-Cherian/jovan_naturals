@@ -162,20 +162,9 @@ When creating any new Django app:
 ## Common Commands
 
 ```bash
-# Development
-python manage.py runserver
-
-# Database
-python manage.py makemigrations
-python manage.py migrate
-python manage.py showmigrations
-python manage.py createsuperuser
-
-# Static files (production)
-python manage.py collectstatic
-
-# Django shell
-python manage.py shell
+python manage.py runserver        # dev server
+python manage.py test store       # run store app tests
+python manage.py shell            # Django shell for debugging
 ```
 
 ## Git Commit Convention
@@ -199,3 +188,124 @@ chore: update requirements.txt
 - NO business logic in views — use services/
 - NO secrets in code — use `.env`
 - Keep JS minimal — only for carousel, cart badge, qty controls
+
+## Service Layer Architecture
+
+All third-party integrations use the Strategy pattern via an abstract
+base class. This is the same pattern Django uses internally for email
+backends, cache backends, and storage backends.
+
+### Structure
+
+```
+store/services/
+├── payment/
+│   ├── __init__.py      # get_payment_service() factory
+│   ├── base.py          # Abstract PaymentService (ABC)
+│   └── razorpay.py      # RazorpayBackend(PaymentService)
+└── shipping/
+    ├── __init__.py      # get_shipping_service() factory
+    ├── base.py          # Abstract ShippingService (ABC)
+    └── shiprocket.py    # ShiprocketBackend(ShippingService)
+```
+
+### Pattern to follow for every integration
+
+**base.py** — defines the interface, no implementation:
+
+```python
+from abc import ABC, abstractmethod
+
+class PaymentService(ABC):
+    @abstractmethod
+    def create_order(self, amount: int, currency: str) -> dict:
+        pass
+
+    @abstractmethod
+    def verify_payment(self, payment_data: dict) -> bool:
+        pass
+```
+
+**razorpay.py** — concrete implementation:
+
+```python
+from .base import PaymentService
+
+class RazorpayBackend(PaymentService):
+    def create_order(self, amount: int, currency: str) -> dict:
+        # Razorpay-specific implementation
+        pass
+
+    def verify_payment(self, payment_data: dict) -> bool:
+        # Razorpay-specific verification
+        pass
+```
+
+`__init__.py` — settings-driven factory:
+
+```python
+from django.conf import settings
+from django.utils.module_loading import import_string
+
+def get_payment_service():
+    backend_class = import_string(settings.PAYMENT_BACKEND)
+    return backend_class()
+```
+
+**settings.py** — one line to swap providers:
+
+```python
+PAYMENT_BACKEND = 'store.services.payment.razorpay.RazorpayBackend'
+SHIPPING_BACKEND = 'store.services.shipping.shiprocket.ShiprocketBackend'
+```
+
+**views.py** — never imports Razorpay or Shiprocket directly:
+
+```python
+from store.services.payment import get_payment_service
+
+def checkout(request):
+    payment = get_payment_service()
+    order = payment.create_order(amount=849, currency='INR')
+```
+
+### Rules
+
+- NEVER import `razorpay` or `shiprocket` directly in views
+- NEVER hardcode provider names anywhere except `settings.py`
+- Adding a new provider = new file only, zero changes to existing code
+- Every new third-party integration follows this same pattern
+
+## Python Conventions (PEP 8)
+
+- snake_case for variables, functions, methods, modules
+- PascalCase for classes
+- UPPER_SNAKE_CASE for constants
+- Prefix private methods/attributes with single underscore `_method`
+- Max line length: 88 characters (Black formatter standard)
+- Two blank lines between top-level functions/classes
+- One blank line between methods inside a class
+- Docstrings on all public functions, classes, and modules
+
+## Naming Conventions
+
+### Python
+
+- Models: singular noun — `Product`, `Order`, `CartItem`
+- Views: action + noun — `product_list`, `product_detail`, `cart_add`
+- URLs: kebab-case — `product-detail`, `order-history`
+- URL names: snake_case — `store:product_detail`, `store:order_history`
+- Services: noun + Service — `PaymentService`, `ShippingService`
+- Templates: match URL name — `product_detail.html`, `order_history.html`
+
+### Templates
+
+- Block names: snake_case — `{% block page_title %}`
+- Template variables: snake_case — `{{ product_list }}`, `{{ cart_total }}`
+- CSS classes: Tailwind utilities only — no custom class names unless
+  absolutely necessary
+
+## Current Spec
+
+Status: Skeleton complete — CLAUDE.md finalised
+Next: Spec 1 — Product listing page (static/placeholder content)
