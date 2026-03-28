@@ -5,6 +5,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>{% block title %}Jovan Naturals{% endblock %}</title>
 
+        <!-- Tailwind CDN -->
+        <script src="https://cdn.tailwindcss.com"></script>
+
         <!-- Tailwind config MUST come before the CDN script -->
         <script>
             tailwind.config = {
@@ -31,9 +34,6 @@
             };
         </script>
 
-        <!-- Tailwind CDN -->
-        <script src="https://cdn.tailwindcss.com"></script>
-
         <!-- Google Fonts -->
         <link
             href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=DM+Sans:wght@400;500&display=swap"
@@ -41,18 +41,160 @@
         />
     </head>
 
-    <body>
-        <!-- Header -->
-        <header>
-            <!-- Placeholder header -->
+    <body class="bg-surface font-sans">
+        <!-- Sticky Topbar -->
+        <header class="sticky top-0 z-50">
+            <!-- Announce Bar -->
+            <div
+                class="bg-primary text-white text-center text-xs py-1.5 font-sans"
+            >
+                Free shipping on orders over ₹499
+            </div>
+            <div class="bg-white border-b border-gray-200">
+                <div
+                    class="max-w-mobile mx-auto px-4 flex items-center justify-between h-14"
+                >
+                    <!-- Logo + Brand -->
+                    <a
+                        href="{% url 'store:product_list' %}"
+                        class="flex items-center"
+                    >
+                        <div
+                            class="w-10 h-10 rounded-full bg-primary-mid flex-shrink-0"
+                        ></div>
+                        <span class="font-serif text-primary text-lg ml-2"
+                            >Jovan Naturals</span
+                        >
+                    </a>
+                    <!-- Cart Icon -->
+                    <a
+                        href="{% url 'store:product_list' %}"
+                        class="relative text-primary"
+                    >
+                        {# TODO: link to cart #}
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-6 h-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 4.3c-.3.5.1 1.2.7 1.2H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"
+                            />
+                        </svg>
+                        <span
+                            class="absolute -top-1.5 -right-2 bg-accent text-primary text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center"
+                            >0</span
+                        >
+                    </a>
+                </div>
+            </div>
         </header>
 
         <!-- Main Content -->
-        <main>{% block content %} {% endblock %}</main>
+        <main class="max-w-mobile mx-auto pb-20">
+            {% block content %}{% endblock %}
+        </main>
 
-        <!-- Footer -->
-        <footer>
-            <!-- Placeholder footer -->
-        </footer>
+        <!-- Fixed Bottom Nav -->
+        <nav class="fixed bottom-0 inset-x-0 z-50" data-nav="bottom">
+            <div
+                class="max-w-mobile mx-auto bg-white border-t border-gray-200 flex items-center justify-around h-16"
+            >
+                <!-- Home -->
+                <a
+                    href="{% url 'store:product_list' %}"
+                    class="flex flex-col items-center text-xs {% if active_nav == 'home' %}text-primary font-medium{% else %}text-gray-500{% endif %}"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-5 h-5 mb-0.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"
+                        />
+                    </svg>
+                    Home
+                </a>
+                <!-- About -->
+                <a
+                    href="{% url 'store:product_list' %}"
+                    class="flex flex-col items-center text-xs {% if active_nav == 'about' %}text-primary font-medium{% else %}text-gray-500{% endif %}"
+                >
+                    {# TODO: link to about #}
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-5 h-5 mb-0.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z"
+                        />
+                    </svg>
+                    About
+                </a>
+                <!-- Cart -->
+                <a
+                    href="{% url 'store:product_list' %}"
+                    class="flex flex-col items-center text-xs {% if active_nav == 'cart' %}text-primary font-medium{% else %}text-gray-500{% endif %}"
+                >
+                    {# TODO: link to cart #}
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-5 h-5 mb-0.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                        />
+                    </svg>
+                    Cart
+                </a>
+                <!-- Orders -->
+                <a
+                    href="{% url 'store:product_list' %}"
+                    class="flex flex-col items-center text-xs {% if active_nav == 'orders' %}text-primary font-medium{% else %}text-gray-500{% endif %}"
+                >
+                    {# TODO: link to orders #}
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-5 h-5 mb-0.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                        />
+                    </svg>
+                    Orders
+                </a>
+            </div>
+        </nav>
+
+        {% block scripts %}{% endblock %}
     </body>
 </html>
