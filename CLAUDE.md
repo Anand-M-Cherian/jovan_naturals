@@ -304,8 +304,3 @@ def checkout(request):
 - Template variables: snake_case — `{{ product_list }}`, `{{ cart_total }}`
 - CSS classes: Tailwind utilities only — no custom class names unless
   absolutely necessary
-
-## Current Spec
-
-Status: Skeleton complete — CLAUDE.md finalised
-Next: Spec 1 — Product listing page (static/placeholder content)
